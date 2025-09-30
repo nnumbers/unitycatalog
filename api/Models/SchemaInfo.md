@@ -9,6 +9,7 @@
 | **properties** | **Map** | A map of key-value properties attached to the securable. | [optional] [default to null] |
 | **full\_name** | **String** | Full name of schema, in form of __catalog_name__.__schema_name__. | [optional] [default to null] |
 | **owner** | **String** | Username of current owner of schema. | [optional] [default to null] |
+| **storage\_location** | **String** | Optional S3 URI path for schema storage. - For managed tables: base path for auto-generated table locations - For external tables: allowed location boundary for validation Example: s3://my-catalog-bucket/my-schema/ Must be under catalog&#39;s storage_root if catalog defines one.  | [optional] [default to null] |
 | **created\_at** | **Long** | Time at which this schema was created, in epoch milliseconds. | [optional] [default to null] |
 | **created\_by** | **String** | Username of schema creator. | [optional] [default to null] |
 | **updated\_at** | **Long** | Time at which this schema was last modified, in epoch milliseconds. | [optional] [default to null] |

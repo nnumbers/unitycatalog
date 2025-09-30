@@ -39,12 +39,16 @@ public class SchemaInfoDAO extends IdentifiableDAO {
   @Column(name = "updated_by")
   private String updatedBy;
 
+  @Column(name = "storage_location")
+  private String storageLocation;
+
   public static SchemaInfoDAO from(SchemaInfo schemaInfo) {
     return SchemaInfoDAO.builder()
         .id(schemaInfo.getSchemaId() != null ? UUID.fromString(schemaInfo.getSchemaId()) : null)
         .name(schemaInfo.getName())
         .comment(schemaInfo.getComment())
         .owner(schemaInfo.getOwner())
+        .storageLocation(schemaInfo.getStorageLocation())
         .createdAt(
             schemaInfo.getCreatedAt() != null
                 ? Date.from(Instant.ofEpochMilli(schemaInfo.getCreatedAt()))
@@ -64,6 +68,7 @@ public class SchemaInfoDAO extends IdentifiableDAO {
         .name(getName())
         .comment(getComment())
         .owner(getOwner())
+        .storageLocation(storageLocation)
         .createdAt(getCreatedAt().getTime())
         .createdBy(getCreatedBy())
         .updatedAt(getUpdatedAt() != null ? getUpdatedAt().getTime() : null)

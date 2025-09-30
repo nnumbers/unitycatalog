@@ -4,6 +4,7 @@
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **comment** | **String** | User-provided free-form text description. | [optional] [default to null] |
+| **storage\_location** | **String** | Optional S3 URI path for schema storage. Must be under catalog&#39;s storage_root if catalog defines one.  | [optional] [default to null] |
 | **properties** | **Map** | A map of key-value properties attached to the securable. | [optional] [default to null] |
 | **new\_name** | **String** | New name for the schema. | [optional] [default to null] |
 

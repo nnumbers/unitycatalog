@@ -4,6 +4,7 @@
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **comment** | **String** | User-provided free-form text description. | [optional] [default to null] |
+| **storage\_root** | **String** | Optional S3 URI for managed table storage root. Required for creating managed tables in this catalog.  | [optional] [default to null] |
 | **properties** | **Map** | A map of key-value properties attached to the securable. | [optional] [default to null] |
 | **new\_name** | **String** | New name for the catalog. | [optional] [default to null] |
 

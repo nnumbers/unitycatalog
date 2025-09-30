@@ -1695,6 +1695,14 @@ components:
         owner:
           description: Username of current owner of schema.
           type: string
+        storage_location:
+          description: |
+            Optional S3 URI path for schema storage.
+            - For managed tables: base path for auto-generated table locations
+            - For external tables: allowed location boundary for validation
+            Example: s3://my-catalog-bucket/my-schema/
+            Must be under catalog's storage_root if catalog defines one.
+          type: string
         created_at:
           description: Time at which this schema was created, in epoch milliseconds.
           type: integer
@@ -1724,6 +1732,11 @@ components:
         comment:
           description: User-provided free-form text description.
           type: string
+        storage_location:
+          description: |
+            Optional S3 URI path for schema storage.
+            Must be under catalog's storage_root if catalog defines one.
+          type: string
         properties:
           $ref: '#/components/schemas/SecurablePropertiesMap'
       required:
@@ -1734,6 +1747,11 @@ components:
       properties:
         comment:
           description: User-provided free-form text description.
+          type: string
+        storage_location:
+          description: |
+            Optional S3 URI path for schema storage.
+            Must be under catalog's storage_root if catalog defines one.
           type: string
         properties:
           $ref: '#/components/schemas/SecurablePropertiesMap'
@@ -1767,6 +1785,12 @@ components:
         owner:
           description: Username of current owner of catalog.
           type: string
+        storage_root:
+          description: |
+            Optional S3 URI for managed table storage root.
+            Example: s3://my-catalog-bucket/ or s3://my-catalog-bucket/prod/
+            Required for creating managed tables in this catalog.
+          type: string
         created_at:
           description: Time at which this catalog was created, in epoch milliseconds.
           type: integer
@@ -1793,6 +1817,11 @@ components:
         comment:
           description: User-provided free-form text description.
           type: string
+        storage_root:
+          description: |
+            Optional S3 URI for managed table storage root.
+            Required for creating managed tables in this catalog.
+          type: string
         properties:
           $ref: '#/components/schemas/SecurablePropertiesMap'
       required:
@@ -1802,6 +1831,11 @@ components:
       properties:
         comment:
           description: User-provided free-form text description.
+          type: string
+        storage_root:
+          description: |
+            Optional S3 URI for managed table storage root.
+            Required for creating managed tables in this catalog.
           type: string
         properties:
           $ref: '#/components/schemas/SecurablePropertiesMap'
