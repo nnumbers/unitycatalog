@@ -4,6 +4,7 @@ import io.unitycatalog.server.exception.BaseException;
 import io.unitycatalog.server.exception.ErrorCode;
 import io.unitycatalog.server.service.credential.CredentialContext;
 import io.unitycatalog.server.utils.ServerProperties;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.StsClientBuilder;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class AwsCredentialVendor {
@@ -21,6 +23,10 @@ public class AwsCredentialVendor {
 
   public AwsCredentialVendor(ServerProperties serverProperties) {
     this.s3Configurations = serverProperties.getS3Configurations();
+  }
+
+  public S3StorageConfig getS3Config(String storageBase) {
+    return s3Configurations.get(storageBase);
   }
 
   public Credentials vendAwsCredentials(CredentialContext context) {
@@ -69,9 +75,16 @@ public class AwsCredentialVendor {
 
     // TODO: should we try and set the region to something configurable or specific to the server
     // instead?
-    return StsClient.builder()
-        .credentialsProvider(credentialsProvider)
-        .region(Region.of(s3StorageConfig.getRegion()))
-        .build();
+    StsClientBuilder stsBuilder =
+        StsClient.builder()
+            .credentialsProvider(credentialsProvider)
+            .region(Region.of(s3StorageConfig.getRegion()));
+
+    // Add custom STS endpoint if configured (e.g., for MinIO)
+    if (s3StorageConfig.getStsEndpoint() != null && !s3StorageConfig.getStsEndpoint().isEmpty()) {
+      stsBuilder.endpointOverride(URI.create(s3StorageConfig.getStsEndpoint()));
+    }
+
+    return stsBuilder.build();
   }
 }

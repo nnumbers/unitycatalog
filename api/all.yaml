@@ -653,6 +653,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TemporaryCredentials'
+  /s3-bucket-configurations:
+    get:
+      operationId: listS3BucketConfigurations
+      tags:
+        - TemporaryCredentials
+      summary: List S3 bucket configurations
+      description: |
+        Returns a list of S3 bucket endpoint configurations that the Unity Catalog server
+        is configured to use. This allows Spark clients to automatically configure per-bucket
+        S3 endpoints without manual configuration.
+
+        This endpoint returns only endpoint information (no credentials) for buckets that
+        the caller has access to through Unity Catalog's permission system.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListS3BucketConfigurationsResponse'
   "/functions":
     post:
       tags:
@@ -2180,6 +2200,14 @@ components:
           description: The token that users must pass to AWS API to use the temporary
             credentials.
           type: string
+        s3_service_endpoint:
+          description: Optional S3 service endpoint URL for S3-compatible storage (e.g., http://minio:9000).
+            When not specified, the default AWS S3 endpoint is used.
+          type: string
+        path_style_access:
+          description: Whether to use path-style access for S3 requests. Required for
+            MinIO and other S3-compatible storage systems. Defaults to false for AWS S3.
+          type: boolean
       type: object
     AzureUserDelegationSAS:
       properties:
@@ -2212,6 +2240,34 @@ components:
         - READ_VOLUME
         - WRITE_VOLUME
       type: string
+    S3BucketConfiguration:
+      type: object
+      description: Configuration for accessing an S3-compatible storage bucket
+      properties:
+        bucket_name:
+          description: The name of the S3 bucket (e.g., "my-bucket" from "s3://my-bucket/path")
+          type: string
+        endpoint:
+          description: S3 endpoint URL (e.g., "http://minio:9000", "https://s3.us-west-2.amazonaws.com")
+          type: string
+        region:
+          description: AWS region for the bucket (e.g., "us-east-1")
+          type: string
+        path_style_access:
+          description: Whether to use path-style access for S3 requests. Required for MinIO/Ceph. Defaults to false for AWS S3.
+          type: boolean
+      required:
+        - bucket_name
+    ListS3BucketConfigurationsResponse:
+      type: object
+      properties:
+        configurations:
+          description: List of S3 bucket configurations
+          type: array
+          items:
+            $ref: '#/components/schemas/S3BucketConfiguration'
+      required:
+        - configurations
     RegisteredModelInfo:
       type: object
       properties:

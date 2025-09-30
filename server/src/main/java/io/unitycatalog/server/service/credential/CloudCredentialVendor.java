@@ -6,6 +6,7 @@ import io.unitycatalog.server.exception.ErrorCode;
 import io.unitycatalog.server.model.*;
 import io.unitycatalog.server.persist.utils.FileOperations;
 import io.unitycatalog.server.service.credential.aws.AwsCredentialVendor;
+import io.unitycatalog.server.service.credential.aws.S3StorageConfig;
 import io.unitycatalog.server.service.credential.azure.AzureCredential;
 import io.unitycatalog.server.service.credential.azure.AzureCredentialVendor;
 import io.unitycatalog.server.service.credential.gcp.GcpCredentialVendor;
@@ -64,10 +65,29 @@ public class CloudCredentialVendor {
       }
       case URI_SCHEME_S3 -> {
         Credentials awsSessionCredentials = vendAwsCredential(context);
-        temporaryCredentials.awsTempCredentials(new AwsCredentials()
+        S3StorageConfig s3Config = awsCredentialVendor.getS3Config(context.getStorageBase());
+
+        AwsCredentials awsCredentials = new AwsCredentials()
           .accessKeyId(awsSessionCredentials.accessKeyId())
           .secretAccessKey(awsSessionCredentials.secretAccessKey())
-          .sessionToken(awsSessionCredentials.sessionToken()));
+          .sessionToken(awsSessionCredentials.sessionToken());
+
+        // Add S3 endpoint and path style access if configured
+        if (s3Config != null) {
+          if (s3Config.getS3ServiceEndpoint() != null && !s3Config.getS3ServiceEndpoint().isEmpty()) {
+            awsCredentials.s3ServiceEndpoint(s3Config.getS3ServiceEndpoint());
+          }
+          if (s3Config.getPathStyleAccess() != null) {
+            awsCredentials.pathStyleAccess(s3Config.getPathStyleAccess());
+          }
+        }
+
+        temporaryCredentials.awsTempCredentials(awsCredentials);
+
+        // Set expiration time if available
+        if (awsSessionCredentials.expiration() != null) {
+          temporaryCredentials.expirationTime(awsSessionCredentials.expiration().toEpochMilli());
+        }
       }
     }
 

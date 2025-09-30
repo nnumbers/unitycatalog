@@ -73,6 +73,12 @@ public class ServerProperties {
           && (accessKey == null || secretKey == null || sessionToken == null)) {
         break;
       }
+      String s3ServiceEndpoint = properties.getProperty("s3.s3ServiceEndpoint." + i);
+      String stsEndpoint = properties.getProperty("s3.stsEndpoint." + i);
+      String pathStyleAccessStr = properties.getProperty("s3.pathStyleAccess." + i);
+      Boolean pathStyleAccess =
+          pathStyleAccessStr != null ? Boolean.parseBoolean(pathStyleAccessStr) : true;
+
       S3StorageConfig s3StorageConfig =
           S3StorageConfig.builder()
               .bucketPath(bucketPath)
@@ -81,6 +87,9 @@ public class ServerProperties {
               .accessKey(accessKey)
               .secretKey(secretKey)
               .sessionToken(sessionToken)
+              .s3ServiceEndpoint(s3ServiceEndpoint)
+              .stsEndpoint(stsEndpoint)
+              .pathStyleAccess(pathStyleAccess)
               .build();
       s3BucketConfigMap.put(bucketPath, s3StorageConfig);
       i++;

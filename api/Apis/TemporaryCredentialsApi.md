@@ -8,6 +8,7 @@ All URIs are relative to *http://localhost:8080/api/2.1/unity-catalog*
 | [**generateTemporaryPathCredentials**](TemporaryCredentialsApi.md#generateTemporaryPathCredentials) | **POST** /temporary-path-credentials | Generate temporary path credentials. |
 | [**generateTemporaryTableCredentials**](TemporaryCredentialsApi.md#generateTemporaryTableCredentials) | **POST** /temporary-table-credentials | Generate temporary table credentials. |
 | [**generateTemporaryVolumeCredentials**](TemporaryCredentialsApi.md#generateTemporaryVolumeCredentials) | **POST** /temporary-volume-credentials | Generate temporary volume credentials. |
+| [**listS3BucketConfigurations**](TemporaryCredentialsApi.md#listS3BucketConfigurations) | **GET** /s3-bucket-configurations | List S3 bucket configurations |
 
 
 <a name="generateTemporaryModelVersionCredentials"></a>
@@ -108,5 +109,29 @@ No authorization required
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="listS3BucketConfigurations"></a>
+# **listS3BucketConfigurations**
+> ListS3BucketConfigurationsResponse listS3BucketConfigurations()
+
+List S3 bucket configurations
+
+    Returns a list of S3 bucket endpoint configurations that the Unity Catalog server is configured to use. This allows Spark clients to automatically configure per-bucket S3 endpoints without manual configuration.  This endpoint returns only endpoint information (no credentials) for buckets that the caller has access to through Unity Catalog&#39;s permission system. 
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**ListS3BucketConfigurationsResponse**](../Models/ListS3BucketConfigurationsResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 

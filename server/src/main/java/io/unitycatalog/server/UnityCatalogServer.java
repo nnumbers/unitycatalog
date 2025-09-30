@@ -176,6 +176,8 @@ public class UnityCatalogServer {
             authorizer, cloudCredentialVendor, repositories);
     TemporaryPathCredentialsService temporaryPathCredentialsService =
         new TemporaryPathCredentialsService(cloudCredentialVendor);
+    S3BucketConfigurationService s3BucketConfigurationService =
+        new S3BucketConfigurationService(unityCatalogServerBuilder.serverProperties);
 
     JacksonRequestConverterFunction requestConverterFunction =
         new JacksonRequestConverterFunction(
@@ -224,6 +226,10 @@ public class UnityCatalogServer {
         .annotatedService(
             BASE_PATH + "temporary-path-credentials",
             temporaryPathCredentialsService,
+            requestConverterFunction)
+        .annotatedService(
+            BASE_PATH + "s3-bucket-configurations",
+            s3BucketConfigurationService,
             requestConverterFunction)
         .annotatedService(BASE_PATH + "credentials", credentialService, requestConverterFunction)
         .annotatedService(

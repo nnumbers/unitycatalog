@@ -31,6 +31,7 @@ class UCSingleCatalog
 
   private[this] var apiClient: ApiClient = null;
   private[this] var temporaryCredentialsApi: TemporaryCredentialsApi = null
+  private[this] var serverBaseUrl: String = null
 
   @volatile private var delegate: TableCatalog = null
 
@@ -40,6 +41,7 @@ class UCSingleCatalog
       throw new IllegalArgumentException(s"uri must be specified for Unity Catalog '$name'")
     }
     val url = new URI(urlStr)
+    serverBaseUrl = urlStr.stripSuffix("/")
     apiClient = new ApiClient()
       .setHost(url.getHost)
       .setPort(url.getPort)
@@ -53,6 +55,13 @@ class UCSingleCatalog
     temporaryCredentialsApi = new TemporaryCredentialsApi(apiClient)
     val proxy = new UCProxy(apiClient, temporaryCredentialsApi)
     proxy.initialize(name, options)
+
+    // Apply S3 bucket configurations from catalog properties
+    applyS3BucketConfigurations(options)
+
+    // Fetch and apply S3 bucket configurations from server (D3)
+    fetchAndApplyServerS3Configurations()
+
     if (UCSingleCatalog.LOAD_DELTA_CATALOG.get()) {
       try {
         delegate = Class.forName("org.apache.spark.sql.delta.catalog.DeltaCatalog")
@@ -66,6 +75,107 @@ class UCSingleCatalog
       }
     } else {
       delegate = proxy
+    }
+  }
+
+  /**
+   * Apply S3 bucket configurations from catalog properties.
+   * Users can configure per-bucket S3 endpoints via properties like:
+   *   spark.sql.catalog.unity.s3.bucket.mybucket.endpoint=http://minio:9000
+   *   spark.sql.catalog.unity.s3.bucket.mybucket.path-style-access=true
+   */
+  private def applyS3BucketConfigurations(options: CaseInsensitiveStringMap): Unit = {
+    try {
+      val hadoopConf = org.apache.spark.sql.SparkSession.active.sparkContext.hadoopConfiguration
+      val s3BucketPrefix = "s3.bucket."
+
+      var configCount = 0
+      options.asScala.foreach { case (key, value) =>
+        if (key.startsWith(s3BucketPrefix)) {
+          // Convert catalog property to Hadoop property
+          // "s3.bucket.mybucket.endpoint" -> "fs.s3a.bucket.mybucket.endpoint"
+          // "s3.bucket.mybucket.path-style-access" -> "fs.s3a.bucket.mybucket.path.style.access"
+          val hadoopKey = key
+            .replace("s3.bucket.", "fs.s3a.bucket.")
+            .replace("path-style-access", "path.style.access")
+
+          hadoopConf.set(hadoopKey, value)
+          configCount += 1
+          logInfo(s"Applied S3 bucket configuration: $hadoopKey = $value")
+        }
+      }
+
+      if (configCount > 0) {
+        logInfo(s"Applied $configCount S3 bucket configuration properties")
+      }
+    } catch {
+      case e: Exception =>
+        logWarning("Failed to apply S3 bucket configurations", e)
+    }
+  }
+
+  /**
+   * Fetch S3 bucket configurations from Unity Catalog server and apply them.
+   * This enables automatic configuration without requiring manual bucket setup.
+   * Falls back silently if the API call fails (for backwards compatibility).
+   */
+  private def fetchAndApplyServerS3Configurations(): Unit = {
+    try {
+      val url = s"$serverBaseUrl/api/2.1/unity-catalog/s3-bucket-configurations"
+      val connection = new java.net.URL(url).openConnection().asInstanceOf[java.net.HttpURLConnection]
+      connection.setRequestMethod("GET")
+      connection.setConnectTimeout(5000)
+      connection.setReadTimeout(5000)
+
+      val responseCode = connection.getResponseCode
+      if (responseCode == 200) {
+        val responseBody = scala.io.Source.fromInputStream(connection.getInputStream).mkString
+
+        // Parse JSON response manually (simple case)
+        val hadoopConf = org.apache.spark.sql.SparkSession.active.sparkContext.hadoopConfiguration
+        var configCount = 0
+
+        // Use Jackson to parse JSON
+        val objectMapper = new com.fasterxml.jackson.databind.ObjectMapper()
+        val jsonNode = objectMapper.readTree(responseBody)
+        val configurations = jsonNode.get("configurations")
+
+        if (configurations != null && configurations.isArray) {
+          configurations.elements().asScala.foreach { config =>
+            val bucketName = config.get("bucket_name").asText()
+            val endpointNode = config.get("endpoint")
+            val pathStyleNode = config.get("path_style_access")
+
+            // Apply endpoint if configured
+            if (endpointNode != null && !endpointNode.isNull && !endpointNode.asText().isEmpty) {
+              val endpoint = endpointNode.asText()
+              hadoopConf.set(s"fs.s3a.bucket.$bucketName.endpoint", endpoint)
+              configCount += 1
+              logInfo(s"Applied S3 endpoint for bucket $bucketName: $endpoint")
+
+              // Determine SSL based on endpoint
+              val sslEnabled = endpoint.startsWith("https")
+              hadoopConf.set(s"fs.s3a.bucket.$bucketName.connection.ssl.enabled", sslEnabled.toString)
+            }
+
+            // Apply path-style access if configured
+            if (pathStyleNode != null && !pathStyleNode.isNull) {
+              hadoopConf.set(s"fs.s3a.bucket.$bucketName.path.style.access", pathStyleNode.asBoolean().toString)
+            }
+          }
+        }
+
+        if (configCount > 0) {
+          logInfo(s"Auto-configured $configCount S3 bucket(s) from Unity Catalog server")
+        }
+      } else {
+        logDebug(s"S3 bucket configurations endpoint returned status $responseCode, " +
+                 "falling back to manual configuration")
+      }
+    } catch {
+      case e: Exception =>
+        logDebug("Could not fetch S3 bucket configurations from server, " +
+                "falling back to manual configuration", e)
     }
   }
 
@@ -176,9 +286,9 @@ object UCSingleCatalog {
   def generateCredentialProps(
       scheme: String,
       temporaryCredentials: TemporaryCredentials): Map[String, String] = {
-    if (scheme == "s3") {
+    if (scheme == "s3" || scheme == "s3a") {
       val awsCredentials = temporaryCredentials.getAwsTempCredentials
-      Map(
+      var props = Map(
         // TODO: how to support s3:// properly?
         "fs.s3a.access.key" -> awsCredentials.getAccessKeyId,
         "fs.s3a.secret.key" -> awsCredentials.getSecretAccessKey,
@@ -187,6 +297,23 @@ object UCSingleCatalog {
         "fs.s3.impl.disable.cache" -> "true",
         "fs.s3a.impl.disable.cache" -> "true"
       )
+
+      // Add S3 endpoint if provided (for MinIO and other S3-compatible storage)
+      Option(awsCredentials.getS3ServiceEndpoint).filter(_.nonEmpty).foreach { endpoint =>
+        props = props ++ Map(
+          "fs.s3a.endpoint" -> endpoint,
+          "fs.s3.endpoint" -> endpoint,  // Also set for s3:// scheme
+          // Determine SSL based on endpoint URL
+          "fs.s3a.connection.ssl.enabled" -> (if (endpoint.startsWith("https")) "true" else "false")
+        )
+      }
+
+      // Use path-style access flag from credentials if provided
+      Option(awsCredentials.getPathStyleAccess).foreach { pathStyle =>
+        props = props + ("fs.s3a.path.style.access" -> pathStyle.toString)
+      }
+
+      props
     } else if (scheme == "gs") {
       val gcsCredentials = temporaryCredentials.getGcpOauthToken
       Map(

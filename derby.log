@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Mon Sep 29 18:28:46 MDT 2025:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0199-9805-930e-000002a23928 
+on database directory /Users/RHarri005@cable.comcast.com/opensource/unitycatalog-ai/unitycatalog/metastore_db with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@1dbd16a6 
+Loaded from file:/Users/RHarri005@cable.comcast.com/spark/versions/spark-4.0.0-bin-hadoop3/jars/derby-10.16.1.1.jar
+java.vendor=Amazon.com Inc.
+java.runtime.version=17.0.14+7-LTS
+user.dir=/Users/RHarri005@cable.comcast.com/opensource/unitycatalog-ai/unitycatalog
+os.name=Mac OS X
+os.arch=aarch64
+os.version=15.6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

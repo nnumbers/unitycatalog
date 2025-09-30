@@ -1,0 +1,54 @@
+# server.properties.local
+#
+# This file is gitignored and should contain your local secrets and configuration.
+# Copy this template to server.properties.local and fill in your actual values.
+#
+# The server will load server.properties.local AFTER server.properties,
+# so any settings here will override the defaults.
+
+## S3 Storage Configuration with Secrets
+
+# Example 1: AWS S3 with IAM role
+# s3.bucketPath.0=s3://my-aws-bucket
+# s3.region.0=us-east-1
+# s3.awsRoleArn.0=arn:aws:iam::123456789012:role/unity-catalog-role
+# s3.accessKey.0=AKIAIOSFODNN7EXAMPLE
+# s3.secretKey.0=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+# Example 2: MinIO or S3-compatible storage
+s3.bucketPath.0=s3://my-minio-bucket
+s3.region.0=us-east-1
+s3.awsRoleArn.0=
+s3.s3ServiceEndpoint.0=http://localhost:9000
+s3.stsEndpoint.0=http://localhost:9000
+s3.pathStyleAccess.0=true
+s3.accessKey.0=minioadmin
+s3.secretKey.0=minioadmin
+
+# Example 3: Custom S3-compatible endpoint (Ceph, Dell ECS, etc.)
+# s3.bucketPath.1=s3://my-custom-bucket
+# s3.region.1=us-east-1
+# s3.awsRoleArn.1=
+# s3.s3ServiceEndpoint.1=https://s3.example.com
+# s3.stsEndpoint.1=https://s3.example.com
+# s3.pathStyleAccess.1=true
+# s3.accessKey.1=YOUR_ACCESS_KEY
+# s3.secretKey.1=YOUR_SECRET_KEY
+
+## Azure ADLS Configuration with Secrets
+# adls.storageAccountName.0=mystorageaccount
+# adls.tenantId.0=your-tenant-id
+# adls.clientId.0=your-client-id
+# adls.clientSecret.0=your-client-secret
+
+## GCS Configuration with Secrets
+# gcs.bucketPath.0=gs://my-gcs-bucket
+# gcs.jsonKeyFilePath.0=/path/to/service-account-key.json
+
+## OAuth Configuration (if using external identity provider)
+# server.authorization=enable
+# server.authorization-url=https://accounts.google.com/o/oauth2/auth
+# server.token-url=https://oauth2.googleapis.com/token
+# server.client-id=your-client-id.apps.googleusercontent.com
+# server.client-secret=your-client-secret
+# server.redirect-port=8080

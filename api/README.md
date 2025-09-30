@@ -53,6 +53,7 @@ All URIs are relative to *http://localhost:8080/api/2.1/unity-catalog*
 *TemporaryCredentialsApi* | [**generateTemporaryPathCredentials**](Apis/TemporaryCredentialsApi.md#generatetemporarypathcredentials) | **POST** /temporary-path-credentials | Generate temporary path credentials. |
 *TemporaryCredentialsApi* | [**generateTemporaryTableCredentials**](Apis/TemporaryCredentialsApi.md#generatetemporarytablecredentials) | **POST** /temporary-table-credentials | Generate temporary table credentials. |
 *TemporaryCredentialsApi* | [**generateTemporaryVolumeCredentials**](Apis/TemporaryCredentialsApi.md#generatetemporaryvolumecredentials) | **POST** /temporary-volume-credentials | Generate temporary volume credentials. |
+*TemporaryCredentialsApi* | [**listS3BucketConfigurations**](Apis/TemporaryCredentialsApi.md#lists3bucketconfigurations) | **GET** /s3-bucket-configurations | List S3 bucket configurations |
 | *VolumesApi* | [**createVolume**](Apis/VolumesApi.md#createvolume) | **POST** /volumes | Create a Volume |
 *VolumesApi* | [**deleteVolume**](Apis/VolumesApi.md#deletevolume) | **DELETE** /volumes/{name} | Delete a Volume |
 *VolumesApi* | [**getVolume**](Apis/VolumesApi.md#getvolume) | **GET** /volumes/{name} | Get a Volume |
@@ -105,6 +106,7 @@ All URIs are relative to *http://localhost:8080/api/2.1/unity-catalog*
  - [ListFunctionsResponse](./Models/ListFunctionsResponse.md)
  - [ListModelVersionsResponse](./Models/ListModelVersionsResponse.md)
  - [ListRegisteredModelsResponse](./Models/ListRegisteredModelsResponse.md)
+ - [ListS3BucketConfigurationsResponse](./Models/ListS3BucketConfigurationsResponse.md)
  - [ListSchemasResponse](./Models/ListSchemasResponse.md)
  - [ListTablesResponse](./Models/ListTablesResponse.md)
  - [ListVolumesResponseContent](./Models/ListVolumesResponseContent.md)
@@ -118,6 +120,7 @@ All URIs are relative to *http://localhost:8080/api/2.1/unity-catalog*
  - [Privilege](./Models/Privilege.md)
  - [PrivilegeAssignment](./Models/PrivilegeAssignment.md)
  - [RegisteredModelInfo](./Models/RegisteredModelInfo.md)
+ - [S3BucketConfiguration](./Models/S3BucketConfiguration.md)
  - [SchemaInfo](./Models/SchemaInfo.md)
  - [SecurableType](./Models/SecurableType.md)
  - [TableDependency](./Models/TableDependency.md)
