@@ -51,6 +51,7 @@ public class SchemaRepository {
                   .name(createSchema.getName())
                   .catalogName(createSchema.getCatalogName())
                   .comment(createSchema.getComment())
+                  .storageLocation(createSchema.getStorageLocation())
                   .owner(callerId)
                   .createdAt(createTime)
                   .createdBy(callerId)

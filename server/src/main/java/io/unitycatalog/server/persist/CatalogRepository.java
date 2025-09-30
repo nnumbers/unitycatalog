@@ -42,6 +42,7 @@ public class CatalogRepository {
             .id(java.util.UUID.randomUUID().toString())
             .comment(createCatalog.getComment())
             .name(createCatalog.getName())
+            .storageRoot(createCatalog.getStorageRoot())
             .owner(callerId)
             .createdAt(createTime)
             .createdBy(callerId)

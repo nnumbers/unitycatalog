@@ -24,20 +24,49 @@ server.cookie-timeout=P5D
 storage-root.models=file:/tmp/ucroot
 
 ## S3 Storage Config (Multiple configs can be added by incrementing the index)
-#s3.bucketPath.0=s3://your-bucket-name
-#s3.region.0=us-east-1
-#s3.awsRoleArn.0=arn:aws:iam::123456789012:role/your-role-name
-# Optional: Custom S3 endpoint for S3-compatible storage (e.g., http://minio:9000)
-#s3.s3ServiceEndpoint.0=https://your-s3-endpoint.example.com
-# Optional: Custom STS endpoint for credential vending (e.g., http://minio:9000)
-#s3.stsEndpoint.0=https://your-sts-endpoint.example.com
+## Example configurations:
+##
+## AWS S3:
+# s3.bucketPath.0=s3://my-aws-bucket
+# s3.region.0=us-east-1
+# s3.awsRoleArn.0=arn:aws:iam::123456789012:role/unity-catalog-role
+# s3.accessKey.0=
+# s3.secretKey.0=
+##
+## MinIO or other S3-compatible storage:
+# s3.bucketPath.1=s3://my-minio-bucket
+# s3.region.1=us-east-1
+# s3.awsRoleArn.1=
+# s3.s3ServiceEndpoint.1=http://minio:9000
+# s3.stsEndpoint.1=http://minio:9000
+# s3.pathStyleAccess.1=true
+# s3.accessKey.1=minioadmin
+# s3.secretKey.1=minioadmin
+##
+## Multiple endpoints (AWS + MinIO):
+# s3.bucketPath.2=s3://another-bucket
+# s3.region.2=us-west-2
+# s3.awsRoleArn.2=
+# s3.s3ServiceEndpoint.2=https://custom-s3.example.com
+# s3.stsEndpoint.2=https://custom-s3.example.com
+# s3.pathStyleAccess.2=true
+# s3.accessKey.2=
+# s3.secretKey.2=
+
+s3.bucketPath.0=
+s3.region.0=
+s3.awsRoleArn.0=
+# Optional: Custom S3 service endpoint for S3-compatible storage (e.g., MinIO, Ceph, Dell ECS)
+s3.s3ServiceEndpoint.0=
+# Optional: Custom STS endpoint for credential vending (e.g., MinIO)
+s3.stsEndpoint.0=
 # Optional: Use path-style access (required for MinIO/Ceph, default: true)
-#s3.pathStyleAccess.0=true
-# Optional (If blank, it will use DefaultCredentialsProviderChain)
-#s3.accessKey.0=
-#s3.secretKey.0=
-# Test Only (If you provide a session token, it will just use those session creds, no downscoping)
-#s3.sessionToken.0=
+s3.pathStyleAccess.0=
+# Optional: Static credentials (If blank, will use DefaultCredentialsProviderChain)
+s3.accessKey.0=
+s3.secretKey.0=
+# Test Only: Static session token (If provided, skips STS AssumeRole)
+s3.sessionToken.0=
 
 ## ADLS Storage Config (Multiple configs can be added by incrementing the index)
 adls.storageAccountName.0=
