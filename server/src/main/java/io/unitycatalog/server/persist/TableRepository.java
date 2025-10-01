@@ -13,6 +13,7 @@ import io.unitycatalog.server.persist.utils.RepositoryUtils;
 import io.unitycatalog.server.persist.utils.TransactionManager;
 import io.unitycatalog.server.utils.Constants;
 import io.unitycatalog.server.utils.IdentityUtils;
+import io.unitycatalog.server.utils.StorageLocationValidator;
 import io.unitycatalog.server.utils.ValidationUtils;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -156,6 +157,25 @@ public class TableRepository {
             throw new BaseException(
                 ErrorCode.INVALID_ARGUMENT, "Storage location is required for external table");
           }
+
+          // Validate external table location is within schema storage boundary
+          SchemaInfoDAO schemaDAO = session.get(SchemaInfoDAO.class, schemaId);
+          String schemaStorageLocation = schemaDAO.getStorageLocation();
+
+          // If schema has storage_location configured, validate table location is within boundary
+          if (schemaStorageLocation != null && !schemaStorageLocation.isEmpty()) {
+            if (!StorageLocationValidator.isWithinBoundary(
+                tableInfo.getStorageLocation(), schemaStorageLocation)) {
+              throw new BaseException(
+                  ErrorCode.PERMISSION_DENIED,
+                  "External table location must be within schema storage boundary. "
+                      + "Table location: "
+                      + tableInfo.getStorageLocation()
+                      + ", Schema boundary: "
+                      + schemaStorageLocation);
+            }
+          }
+
           TableInfoDAO tableInfoDAO = TableInfoDAO.from(tableInfo);
           tableInfoDAO.setSchemaId(schemaId);
           // create columns
