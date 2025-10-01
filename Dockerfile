@@ -41,7 +41,7 @@ COPY --from=base --parents \
 
 # Create a service user with read and execute permissions and write permissions of the ./etc directory
 RUN <<EOF
-apk add --no-cache bash
+apk add --no-cache bash gcompat
 addgroup -S $USER
 adduser -S -G $USER $USER
 chmod -R 550 $HOME
